@@ -1,2 +1,5 @@
 # Accidental Windows-path artifacts
 "C:\Users\*
+.gradle/
+build/
+**/build/
