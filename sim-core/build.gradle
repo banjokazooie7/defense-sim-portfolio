@@ -1,5 +1,15 @@
+plugins {
+    id 'application'
+}
+
+application {
+    mainClass = 'io.github.banjokazooie7.simcore.examples.HelloSimMain'
+}
+
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 }
+
+
 
 

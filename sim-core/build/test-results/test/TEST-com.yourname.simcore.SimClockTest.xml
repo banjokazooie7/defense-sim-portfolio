@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.yourname.simcore.SimClockTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-02-11T18:35:31" hostname="LAPTOP-7EH58SST" time="0.043">
-  <properties/>
-  <testcase name="advancesTime()" classname="com.yourname.simcore.SimClockTest" time="0.037"/>
-  <testcase name="rejectsNegativeAdvance()" classname="com.yourname.simcore.SimClockTest" time="0.003"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
