@@ -8,7 +8,7 @@ class TargetTest {
 
     @Test
     void constructsWithValidParams(){
-        Target t = new Target("TGT-001", t.getId());
+        Target t = new Target("TGT-001", new Position2D(0, 0), 100.0, 50.0);
         assertEquals("TGT-001", t.getId());
         assertEquals(0.0, t.getPosition().xMeters(), EPSILON);
         assertEquals(100.0, t.getVx(), EPSILON);
