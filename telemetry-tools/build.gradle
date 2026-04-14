@@ -1,0 +1,12 @@
+plugins {
+    id 'application'
+}
+
+application {
+    mainClass = 'io.github.banjokazooie7.telemetry.examples.Week4Demo'
+}
+
+dependencies {
+    implementation project(':sim-core')
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+}
