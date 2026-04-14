@@ -15,4 +15,8 @@ public final class SimClock{
 		if(deltaMillis < 0) throw new IllegalArgumentException("deltaMillis must be >= 0");
 		nowMillis += deltaMillis;
 	}
+
+	public void reset(){
+		this.nowMillis = 0;
+	}
 }

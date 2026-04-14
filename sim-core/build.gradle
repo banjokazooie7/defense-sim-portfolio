@@ -3,7 +3,7 @@ plugins {
 }
 
 application {
-    mainClass = 'io.github.banjokazooie7.simcore.examples.HelloSimMain'
+    mainClass = 'io.github.banjokazooie7.simcore.examples.Week2Demo'
 }
 
 dependencies {
