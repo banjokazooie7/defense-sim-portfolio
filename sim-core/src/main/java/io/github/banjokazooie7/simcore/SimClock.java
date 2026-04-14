@@ -1,22 +1,33 @@
 package io.github.banjokazooie7.simcore;
 
-public final class SimClock{
-	private long nowMillis;
+public final class SimClock {
 
-	public SimClock(long startMillis){
-		this.nowMillis = startMillis;
-	}
+    private long nowMillis;
 
-	public long now(){
-		return nowMillis;
-	}
+    public SimClock(long startMillis) {
+        if (startMillis < 0) {
+            throw new IllegalArgumentException("startMillis must be >= 0, got: " + startMillis);
+        }
+        this.nowMillis = startMillis;
+    }
 
-	public void advance(long deltaMillis){
-		if(deltaMillis < 0) throw new IllegalArgumentException("deltaMillis must be >= 0");
-		nowMillis += deltaMillis;
-	}
+    public long now() {
+        return nowMillis;
+    }
 
-	public void reset(){
-		this.nowMillis = 0;
-	}
+    public void advance(long deltaMillis) {
+        if (deltaMillis < 0) {
+            throw new IllegalArgumentException("deltaMillis must be >= 0, got: " + deltaMillis);
+        }
+        nowMillis += deltaMillis;
+    }
+
+    public void reset() {
+        this.nowMillis = 0;
+    }
+
+    @Override
+    public String toString() {
+        return "SimClock{nowMillis=" + nowMillis + "}";
+    }
 }
