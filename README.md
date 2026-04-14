@@ -24,9 +24,9 @@ Run all tests:
 
 | Module            | Status     | Description                                         |
 |-------------------|------------|-----------------------------------------------------|
-| `sim-core`        | **v1.0**   | DES engine, entities, metrics, CSV output            |
-| `telemetry-tools` | planned    | UDP packet sender/listener, binary telemetry codec   |
-| `radar-sim`       | planned    | Radar sensor model, target tracking, metrics         |
+| `sim-core`        | **v1.0**   | DES engine, entities, metrics, CSV output           |
+| `telemetry-tools` | **v1.0**   | UDP packet sender/listener, binary telemetry codec  |
+| `radar-sim`       | planned    | Radar sensor model, target tracking, metrics        |
 
 ## sim-core architecture
 
@@ -54,7 +54,7 @@ Run all tests:
 | 1    | DES engine core          | SimEvent, DiscreteEventEngine, EventListener              |
 | 2    | Entities + metrics + out | Position2D, Entity, Target, MetricsCollector, SimLogger   |
 | 3    | sim-core v1.0 polish     | Heading, expanded tests, package-info, bug fixes          |
-
+| 4    | Telemetry packet         | TelemetryPacket, PacketCodec, Sender, Listener            |
 ## License
 
 MIT
