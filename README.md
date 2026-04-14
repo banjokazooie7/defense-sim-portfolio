@@ -29,21 +29,22 @@ Run all tests:
 | `radar-sim`       | planned    | Radar sensor model, target tracking, metrics         |
 
 ## sim-core architecture
-sim-core/
-├── engine/
-│   └── DiscreteEventEngine    # priority-queue event scheduler
-├── entity/
-│   ├── Entity                 # interface — contract for sim objects
-│   ├── Position2D             # immutable 2D coordinate (meters)
-│   └── Target                 # constant-velocity target with heading
-├── event/
-│   ├── SimEvent               # time + priority + type + callback
-│   └── EventListener          # observer interface
-├── metrics/
-│   └── MetricsCollector       # counts events by type, tracks timing
-├── output/
-│   └── SimLogger              # writes event log to CSV
-└── SimClock                   # monotonic millisecond clock
+
+    sim-core/
+    ├── engine/
+    │   └── DiscreteEventEngine    # priority-queue event scheduler
+    ├── entity/
+    │   ├── Entity                 # interface — contract for sim objects
+    │   ├── Position2D             # immutable 2D coordinate (meters)
+    │   └── Target                 # constant-velocity target with heading
+    ├── event/
+    │   ├── SimEvent               # time + priority + type + callback
+    │   └── EventListener          # observer interface
+    ├── metrics/
+    │   └── MetricsCollector       # counts events by type, tracks timing
+    ├── output/
+    │   └── SimLogger              # writes event log to CSV
+    └── SimClock                   # monotonic millisecond clock
 
 ## Week log
 
