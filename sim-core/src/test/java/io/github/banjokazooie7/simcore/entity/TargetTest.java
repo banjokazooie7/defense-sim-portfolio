@@ -86,10 +86,56 @@ class TargetTest {
         assertEquals(0.0, t.getPosition().xMeters(), EPSILON);
     }
 
+@Test
+    void headingNorth_isZeroDegrees() {
+        Target t = new Target("H1", new Position2D(0, 0), 0.0, 100.0);
+        assertEquals(0.0, t.getHeadingDegrees(), EPSILON);
+    }
+
+    @Test
+    void headingEast_is90Degrees() {
+        Target t = new Target("H2", new Position2D(0, 0), 100.0, 0.0);
+        assertEquals(90.0, t.getHeadingDegrees(), EPSILON);
+    }
+
+    @Test
+    void headingSouth_is180Degrees() {
+        Target t = new Target("H3", new Position2D(0, 0), 0.0, -100.0);
+        assertEquals(180.0, t.getHeadingDegrees(), EPSILON);
+    }
+
+    @Test
+    void headingWest_is270Degrees() {
+        Target t = new Target("H4", new Position2D(0, 0), -100.0, 0.0);
+        assertEquals(270.0, t.getHeadingDegrees(), EPSILON);
+    }
+
+    @Test
+    void headingNortheast_is45Degrees() {
+        Target t = new Target("H5", new Position2D(0, 0), 100.0, 100.0);
+        assertEquals(45.0, t.getHeadingDegrees(), EPSILON);
+    }
+
+    @Test
+    void stationaryHeading_isZero() {
+        Target t = new Target("H6", new Position2D(0, 0), 0.0, 0.0);
+        assertEquals(0.0, t.getHeadingDegrees(), EPSILON);
+    }
+
+    @Test
+    void headingUpdatesAfterManeuver() {
+        Target t = new Target("H7", new Position2D(0, 0), 100.0, 0.0);
+        assertEquals(90.0, t.getHeadingDegrees(), EPSILON);
+        t.setVelocity(0.0, 100.0);
+        assertEquals(0.0, t.getHeadingDegrees(), EPSILON);
+    }
+
     void toStringContainsIdAndPosition(){
         Target t = new Target("TGT-042", new Position2D(100, 200), 10, 20);
         String s = t.toString();
         assertTrue(s.contains("TGT-042"));
         assertTrue(s.contains("100"));
+	assertTrue(s.contains("hdg="));
+	assertTrue(s.contains("spd="));
     }
 }

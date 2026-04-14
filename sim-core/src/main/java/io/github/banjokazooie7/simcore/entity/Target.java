@@ -28,7 +28,19 @@ public final class Target implements Entity{
     public double getVy(){return vyMetersPerSec;}
 
     public double getSpeed(){return Math.sqrt(vxMetersPerSec * vxMetersPerSec 
-        + vyMetersPerSec * vyMetersPerSec);}
+        + vyMetersPerSec * vyMetersPerSec);
+    }
+    public double getHeadingDegrees(){
+	if(vxMetersPerSec == 0.0 && vyMetersPerSec == 0.0){
+		return 0.0;
+	}
+	double radians = Math.atan2(vxMetersPerSec, vyMetersPerSec);
+	double degrees = Math.toDegrees(radians);
+	if(degrees < 0){
+		degrees += 360.0;
+	}
+	return degrees;
+    }
 
     public void setVelocity(double vx, double vy){
         this.vxMetersPerSec = vx;
@@ -47,10 +59,9 @@ public final class Target implements Entity{
         this.position = position.translate(dx, dy);
     }
 
-    @Override
-    public String toString(){
-        return String.format("Target{id=%s, pos=%s, vel=(%.1f, %.1f) m/s}", 
-            id, position, vxMetersPerSec, vyMetersPerSec);
+	@Override
+    public String toString() {
+        return String.format("Target{id=%s, pos=%s, vel=(%.1f, %.1f) m/s, hdg=%.1f°, spd=%.1f m/s}",
+                id, position, vxMetersPerSec, vyMetersPerSec, getHeadingDegrees(), getSpeed());
     }
-
 }
