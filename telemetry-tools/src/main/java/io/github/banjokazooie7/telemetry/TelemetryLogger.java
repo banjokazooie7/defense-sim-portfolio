@@ -21,14 +21,18 @@ public final class TelemetryLogger{
 
     // Record one packet as a CSV row
     public void log(TelemetryPacket packet) {
-        String row = packet.sequenceNumber() + "," +
-            packet.timestampMillis() + "," +
-            escapeCsv(packet.entityId()) + "," +
-            String.format("%.4f,%.4f,%.4f,%.4f", // Still use format for precision if needed
-            packet.xMeters(), packet.yMeters(), 
-            packet.vxMetersPerSec(), packet.vyMetersPerSec()) + "," +
-            escapeCsv(packet.eventType());
-        rows.add(row);
+        StringBuilder sb = new StringBuilder(128); // Pre-size for performance
+        sb.append(packet.sequenceNumber()).append(',')
+            .append(packet.timestampMillis()).append(',')
+            .append(escapeCsv(packet.entityId())).append(',')
+            .append(packet.xMeters()).append(',') // Appending doubles directly is faster
+            .append(packet.yMeters()).append(',')
+            .append(packet.vxMetersPerSec()).append(',')
+            .append(packet.vyMetersPerSec()).append(',')
+            .append(escapeCsv(packet.eventType()));
+    
+        // If you switch to streaming, you'd write sb.toString() to the BufferedWriter here
+        rows.add(sb.toString()); 
     }
 
     public void logAll(List<TelemetryPacket> packets){
