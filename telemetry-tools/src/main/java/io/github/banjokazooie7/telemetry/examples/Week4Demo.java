@@ -46,17 +46,18 @@ public final class Week4Demo {
         System.out.println();
 
         // Schedule target updates that also send telemetry
+        final int[] seq = {0};
         for (long t = UPDATE_INTERVAL; t <= SIM_DURATION_MS; t += UPDATE_INTERVAL) {
             final long time = t;
             engine.schedule(new SimEvent(t, 0, "TARGET_UPDATE", () -> {
                 target.update(UPDATE_INTERVAL);
                 TelemetryPacket pkt = new TelemetryPacket(
-                        time, target.getId(),
+                        seq[0]++, time, target.getId(),
                         target.getPosition().xMeters(), target.getPosition().yMeters(),
                         target.getVx(), target.getVy(), "TARGET_UPDATE");
                 sender.send(pkt);
-                System.out.printf("  [t=%dms] Sent: %s at %s%n",
-                        time, target.getId(), target.getPosition());
+                System.out.printf("  [t=%dms] Sent seq=%d: %s at %s%n",
+                        time, pkt.sequenceNumber(), target.getId(), target.getPosition());
             }));
         }
 

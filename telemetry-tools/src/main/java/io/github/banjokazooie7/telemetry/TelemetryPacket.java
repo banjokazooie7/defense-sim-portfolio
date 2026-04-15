@@ -10,7 +10,9 @@ package io.github.banjokazooie7.telemetry;
  * - vx, vy: velocity in m/s
  * - eventType: what kind of event triggered this packet
  */
+
 public record TelemetryPacket(
+        int sequenceNumber,
         long timestampMillis,
         String entityId,
         double xMeters,
@@ -20,6 +22,9 @@ public record TelemetryPacket(
         String eventType
 ) {
     public TelemetryPacket {
+        if (sequenceNumber < 0) {
+            throw new IllegalArgumentException("sequenceNumber must be >= 0");
+        }
         if (entityId == null || entityId.isBlank()) {
             throw new IllegalArgumentException("entityId must not be null or blank");
         }
@@ -31,8 +36,8 @@ public record TelemetryPacket(
     @Override
     public String toString() {
         return String.format(
-                "TelemetryPacket{t=%dms, id=%s, pos=(%.1f,%.1f), vel=(%.1f,%.1f), type=%s}",
-                timestampMillis, entityId, xMeters, yMeters,
+                "TelemetryPacket{seq=%d, t=%dms, id=%s, pos=(%.1f,%.1f), vel=(%.1f,%.1f), type=%s}",
+                sequenceNumber, timestampMillis, entityId, xMeters, yMeters,
                 vxMetersPerSec, vyMetersPerSec, eventType);
     }
 }

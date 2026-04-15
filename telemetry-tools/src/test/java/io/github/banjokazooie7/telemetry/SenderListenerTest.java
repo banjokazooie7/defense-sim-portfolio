@@ -14,7 +14,7 @@ class SenderListenerTest {
     @Test
     void sendAndReceiveOnePacket() {
         TelemetryPacket original = new TelemetryPacket(
-                1000, "TGT-001", 500.0, 300.0, 100.0, 50.0, "TARGET_UPDATE");
+                1, 1000, "TGT-001", 500.0, 300.0, 100.0, 50.0, "TARGET_UPDATE");
 
         try (TelemetryListener listener = new TelemetryListener(PORT, 2000);
              TelemetrySender sender = new TelemetrySender("localhost", PORT)) {
@@ -36,7 +36,7 @@ class SenderListenerTest {
 
             for (int i = 0; i < 5; i++) {
                 sender.send(new TelemetryPacket(
-                        i * 1000, "TGT-" + i, i * 10.0, i * 20.0,
+                        i, i * 1000, "TGT-" + i, i * 10.0, i * 20.0,
                         100.0, 0.0, "UPDATE"));
             }
 
@@ -68,7 +68,7 @@ class SenderListenerTest {
     @Test
     void packetDataSurvivesNetworkRoundTrip() {
         TelemetryPacket original = new TelemetryPacket(
-                9999, "RADAR-NORTH", -1234.5, 6789.0, -50.0, 200.0, "RADAR_SWEEP");
+                42, 9999, "RADAR-NORTH", -1234.5, 6789.0, -50.0, 200.0, "RADAR_SWEEP");
 
         try (TelemetryListener listener = new TelemetryListener(PORT + 4, 2000);
              TelemetrySender sender = new TelemetrySender("localhost", PORT + 4)) {
@@ -77,13 +77,7 @@ class SenderListenerTest {
             TelemetryPacket received = listener.receiveOne();
 
             assertNotNull(received);
-            assertEquals(original.timestampMillis(), received.timestampMillis());
-            assertEquals(original.entityId(), received.entityId());
-            assertEquals(original.xMeters(), received.xMeters(), EPSILON);
-            assertEquals(original.yMeters(), received.yMeters(), EPSILON);
-            assertEquals(original.vxMetersPerSec(), received.vxMetersPerSec(), EPSILON);
-            assertEquals(original.vyMetersPerSec(), received.vyMetersPerSec(), EPSILON);
-            assertEquals(original.eventType(), received.eventType());
+            assertEquals(original, received);
         }
     }
 }

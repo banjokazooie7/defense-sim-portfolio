@@ -10,22 +10,21 @@ import java.nio.charset.StandardCharsets;
  * network standard (and the default for ByteBuffer). Defense systems
  * call this "network byte order."
  */
+
 public final class PacketCodec {
 
     private PacketCodec() {}
 
-    /**
-     * Encode a TelemetryPacket into a byte array for transmission.
-     */
     public static byte[] encode(TelemetryPacket packet) {
         byte[] entityIdBytes = packet.entityId().getBytes(StandardCharsets.UTF_8);
         byte[] eventTypeBytes = packet.eventType().getBytes(StandardCharsets.UTF_8);
 
-        int totalSize = 8 + 8 + 8 + 8 + 8   // long + 4 doubles
-                + 2 + entityIdBytes.length     // short + string
-                + 2 + eventTypeBytes.length;   // short + string
+        int totalSize = 4 + 8 + 8 + 8 + 8 + 8  // int + long + 4 doubles
+                + 2 + entityIdBytes.length        // short + string
+                + 2 + eventTypeBytes.length;      // short + string
 
         ByteBuffer buf = ByteBuffer.allocate(totalSize);
+        buf.putInt(packet.sequenceNumber());
         buf.putLong(packet.timestampMillis());
         buf.putDouble(packet.xMeters());
         buf.putDouble(packet.yMeters());
@@ -39,12 +38,10 @@ public final class PacketCodec {
         return buf.array();
     }
 
-    /**
-     * Decode a byte array back into a TelemetryPacket.
-     */
     public static TelemetryPacket decode(byte[] data) {
         ByteBuffer buf = ByteBuffer.wrap(data);
 
+        int seq = buf.getInt();
         long timestamp = buf.getLong();
         double x = buf.getDouble();
         double y = buf.getDouble();
@@ -61,6 +58,6 @@ public final class PacketCodec {
         buf.get(eventTypeBytes);
         String eventType = new String(eventTypeBytes, StandardCharsets.UTF_8);
 
-        return new TelemetryPacket(timestamp, entityId, x, y, vx, vy, eventType);
+        return new TelemetryPacket(seq, timestamp, entityId, x, y, vx, vy, eventType);
     }
 }
