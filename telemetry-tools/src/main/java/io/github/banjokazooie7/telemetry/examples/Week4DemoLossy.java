@@ -15,36 +15,32 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * End-to-end demo of the Week 4 telemetry stack.
+ * Same as Week4Demo, but with simulated packet loss.
  *
- * sim-core drives a Target's motion. Each tick, a TelemetryPacket is sent
- * over UDP from a TelemetrySender to a TelemetryListener running in a
- * background thread. A TelemetryPipeline fans every received packet out
- * to two sinks:
+ * Every DROP_EVERY_NTH packet is built and assigned a sequence number,
+ * then deliberately NOT sent — simulating what real UDP packet loss looks
+ * like from the receiver's perspective. The DropDetector should catch
+ * the resulting sequence-number gaps and report a non-zero drop rate.
  *
- *   - DropDetector  — tracks sequence gaps and computes drop rate
- *   - TelemetryLogger — writes a CSV for post-mission analysis
+ * This demonstrates that the audit layer works on something other than
+ * a perfect localhost connection.
  *
  * Run with:
- *   ./gradlew :telemetry-tools:runWeek4Demo
- *
- * Output:
- *   - Console summary (sent count, received count, drops, drop rate)
- *   - build/telemetry-out/week4-demo.csv
+ *   ./gradlew :telemetry-tools:runLossy
  */
-public final class Week4Demo {
+public final class Week4DemoLossy {
 
-    private static final int PORT = 19_900;
-    private static final long SIM_DURATION_MS = 5_000;
-    private static final long UPDATE_INTERVAL = 1_000;
-    private static final Path CSV_OUT = Paths.get("build", "telemetry-out", "week4-demo.csv");
+    private static final int PORT = 19_901;
+    private static final long SIM_DURATION_MS = 10_000;
+    private static final long UPDATE_INTERVAL = 500;   // 20 packets total
+    private static final int DROP_EVERY_NTH = 3;       // drop seq 2, 5, 8, ...
+    private static final Path CSV_OUT = Paths.get("build", "telemetry-out", "week4-demo-lossy.csv");
 
     public static void main(String[] args) {
-        System.out.println("=== Week 4 Demo: Telemetry over UDP with Pipeline ===");
+        System.out.println("=== Week 4 Demo: Telemetry with Simulated Packet Loss ===");
+        System.out.println("Dropping every " + DROP_EVERY_NTH + "rd packet to test drop detection.");
         System.out.println();
 
-        // Sinks live in main so we can read their state after the listener
-        // thread finishes.
         DropDetector detector = new DropDetector();
         TelemetryLogger logger = new TelemetryLogger();
 
@@ -56,15 +52,12 @@ public final class Week4Demo {
         Thread listenerThread = new Thread(() -> {
             int dispatched = pipeline.pump();
             System.out.println();
-            System.out.println("--- Pipeline dispatched " + dispatched + " packets to "
-                    + pipeline.getSinkCount() + " sinks ---");
+            System.out.println("--- Pipeline dispatched " + dispatched + " packets ---");
         });
         listenerThread.start();
 
-        // Small delay to let the listener thread enter its receive loop
         try { Thread.sleep(100); } catch (InterruptedException e) { /* ignore */ }
 
-        // Set up sim
         DiscreteEventEngine engine = new DiscreteEventEngine(SIM_DURATION_MS);
         Target target = new Target("TGT-A", new Position2D(0, 0), 200.0, 150.0);
         TelemetrySender sender = new TelemetrySender("localhost", PORT);
@@ -72,42 +65,59 @@ public final class Week4Demo {
         System.out.println("Target: " + target);
         System.out.println("Sending telemetry to localhost:" + PORT);
         System.out.println();
+        System.out.println("--- Simulation running ---");
 
-        // Schedule target updates that also send telemetry
         final int[] seq = {0};
+        final int[] skipped = {0};
         for (long t = UPDATE_INTERVAL; t <= SIM_DURATION_MS; t += UPDATE_INTERVAL) {
             final long time = t;
             engine.schedule(new SimEvent(t, 0, "TARGET_UPDATE", () -> {
                 target.update(UPDATE_INTERVAL);
+                int thisSeq = seq[0]++;
                 TelemetryPacket pkt = new TelemetryPacket(
-                        seq[0]++, time, target.getId(),
+                        thisSeq, time, target.getId(),
                         target.getPosition().xMeters(), target.getPosition().yMeters(),
                         target.getVx(), target.getVy(), "TARGET_UPDATE");
+
+                // Simulate a dropped packet: build it, assign sequence number,
+                // then deliberately fail to send. From the receiver's view this
+                // is indistinguishable from real UDP loss.
+                if (thisSeq > 0 && thisSeq % DROP_EVERY_NTH == 0) {
+                    skipped[0]++;
+                    System.out.printf("  [t=%dms] DROP   seq=%d (simulated loss)%n",
+                            time, thisSeq);
+                    return;
+                }
                 sender.send(pkt);
-                System.out.printf("  [t=%dms] Sent seq=%d: %s at %s%n",
-                        time, pkt.sequenceNumber(), target.getId(), target.getPosition());
+                System.out.printf("  [t=%dms] Sent   seq=%d at %s%n",
+                        time, thisSeq, target.getPosition());
             }));
         }
 
-        System.out.println("--- Simulation running ---");
         DiscreteEventEngine.RunStats stats = engine.run();
         System.out.println("--- Simulation complete ---");
-        System.out.println("Packets sent: " + sender.getPacketsSent());
+        System.out.println("Packets sent:    " + sender.getPacketsSent());
+        System.out.println("Packets dropped: " + skipped[0] + " (simulated at sender)");
         sender.close();
 
-        // Wait for the listener thread to finish draining the socket
         try { listenerThread.join(5000); } catch (InterruptedException e) { /* ignore */ }
         pipeline.close();
 
-        // Flush CSV to disk
         logger.flush(CSV_OUT);
 
-        // Final summary — this is the part a reviewer will read.
         System.out.println();
         System.out.println("--- Telemetry Audit ---");
         System.out.println(detector.toSummary());
         System.out.println("CSV written to: " + CSV_OUT.toAbsolutePath());
         System.out.println();
         System.out.println(stats);
+
+        // Sanity check: the detector should have caught exactly the packets we skipped.
+        if (detector.getTotalDropped() == skipped[0]) {
+            System.out.println("\nAudit matches expected loss. Drop detection working correctly.");
+        } else {
+            System.out.printf("%nMISMATCH: skipped %d at sender, detector reported %d dropped.%n",
+                    skipped[0], detector.getTotalDropped());
+        }
     }
 }

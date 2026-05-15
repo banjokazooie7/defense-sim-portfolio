@@ -8,10 +8,10 @@ import java.util.List;
 * Tracks telemetry packet sequence numbers and detects gaps
 *
 *When packets arrive out of order or are lost, the detector records
-*whichs sequence numbers were missed. Post-Mission Analysis.
+*which sequence numbers were missed. Post-Mission Analysis.
 **/
 
-public final class DropDetector{
+public final class DropDetector implements PacketSink{
     private int expectedNext;
     private long totalReceived;
     private long totalDropped;
@@ -24,6 +24,9 @@ public final class DropDetector{
         this.totalDropped = 0;
         this.droppedSequences = new ArrayList<>();
         this.seenSequences = new ArrayList<>();
+    }
+    public void onPacket(TelemetryPacket packet){
+	record(packet);
     }
 
     //Record a received packet. IF its sequence number is ahead of expected value
@@ -45,7 +48,7 @@ public final class DropDetector{
             return;
         }
 
-        //Gap dtected: record missing sequence mumbers
+        //Gap detected: record missing sequence numbers
         if(seq > expectedNext){
             for(int missed = expectedNext; missed < seq; missed++){
                 if(!seenSequences.contains(missed)){
@@ -75,7 +78,7 @@ public final class DropDetector{
         return expectedNext;
     }
 
-    //Drop rate as a frcation: dropped / (dropped + received)
+    //Drop rate as a fracation: dropped / (dropped + received)
     //Returns 0.0 if nothing has been recorded yet
     public double getDropRate(){
         long total = totalReceived + totalDropped;
@@ -88,6 +91,7 @@ public final class DropDetector{
         totalReceived = 0;
         totalDropped = 0;
         droppedSequences.clear();
+        seenSequences.clear();
     }
 
     public String toSummary(){

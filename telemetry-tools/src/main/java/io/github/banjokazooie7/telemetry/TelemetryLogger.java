@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public final class TelemetryLogger{
+public final class TelemetryLogger implements PacketSink {
     private static final String HEADER = 
         "seq,sim_time_ms,entity_id,x_meters,y_meters,vx_m_s,vy_m_s,event_type";
         
@@ -17,6 +17,9 @@ public final class TelemetryLogger{
 
     public TelemetryLogger(){
         this.rows = Collections.synchronizedList(new ArrayList<>());
+    }
+    public void onPacket(TelemetryPacket packet){
+	log(packet);
     }
 
     // Record one packet as a CSV row

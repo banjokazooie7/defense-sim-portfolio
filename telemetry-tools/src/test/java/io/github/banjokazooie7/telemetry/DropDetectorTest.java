@@ -143,6 +143,18 @@ class DropDetectorTest {
 
         assertFalse(detector.getDroppedSequences().contains(1), "Late packet should be removed from dropped list");
     }
+    @Test
+    void resetClearsSeenSequences() {
+        detector.record(makePacket(0));
+        detector.record(makePacket(1));
+        detector.reset();
+
+        // After reset, a previously-seen sequence number should be
+        // accepted as fresh, not silently ignored as a duplicate.
+        detector.record(makePacket(0));
+        assertEquals(1, detector.getTotalReceived(),
+                "After reset, previously-seen sequences should be recordable again");
+    }
 
     private TelemetryPacket makePacket(int seq) {
         return new TelemetryPacket(seq, 0, "TGT", 0, 0, 0, 0, "UPDATE");

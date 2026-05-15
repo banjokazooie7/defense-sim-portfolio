@@ -6,6 +6,13 @@ application {
     mainClass = 'io.github.banjokazooie7.telemetry.examples.Week4Demo'
 }
 
+tasks.register('runLossy', JavaExec) {
+    group = 'application'
+    description = 'Run the Week 4 lossy telemetry demo (simulated packet loss).'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'io.github.banjokazooie7.telemetry.examples.Week4DemoLossy'
+}
+
 dependencies {
     implementation project(':sim-core')
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
